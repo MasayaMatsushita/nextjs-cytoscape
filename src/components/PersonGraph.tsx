@@ -68,6 +68,7 @@ useEffect(() => {
   };
 }, []);
 
+// personsのポーリング
 useEffect(() => {
   const interval = setInterval(async () => {
     const res = await fetch('/api/persons');
@@ -77,6 +78,23 @@ useEffect(() => {
       if (!cyInstance?.getElementById(person.data.id).length) {
         cyInstance?.add(person);
         cyInstance?.layout({ name: 'circle' }).run();
+      }
+    });
+  }, 5000);
+
+  return () => clearInterval(interval);
+}, [cyInstance]);
+
+// relationsのポーリング
+useEffect(() => {
+  const interval = setInterval(async () => {
+    const res = await fetch('/api/relations');
+    const newRelations = await res.json();
+
+    newRelations.forEach((relation: any) => {
+      if (!cyInstance?.getElementById(relation.data.id).length) {
+        cyInstance?.add(relation);
+        cyInstance?.layout({ name: 'grid' }).run();
       }
     });
   }, 5000);
