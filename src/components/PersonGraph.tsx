@@ -94,7 +94,7 @@ useEffect(() => {
     newRelations.forEach((relation: any) => {
       if (!cyInstance?.getElementById(relation.data.id).length) {
         cyInstance?.add(relation);
-        cyInstance?.layout({ name: 'grid' }).run();
+        cyInstance?.layout({ name: 'circle' }).run();
       }
     });
   }, 5000);
