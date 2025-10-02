@@ -7,22 +7,22 @@ const PersonGraph = () => {
   const cyRef = useRef<HTMLDivElement>(null);
   const [cyInstance, setCyInstance] = useState<cytoscape.Core | null>(null);
 
-  useEffect(() => {
-    const fetchDataAndRender = async () => {
-      const [personsRes, relationsRes] = await Promise.all([
-        fetch('/api/persons'),
-        fetch('/api/relations'),
-      ]);
+useEffect(() => {
+  const fetchDataAndRender = async () => {
+    const [personsRes, relationsRes] = await Promise.all([
+      fetch('/api/persons'),
+      fetch('/api/relations'),
+    ]);
 
-      const persons = await personsRes.json();
-      const relations = await relationsRes.json();
+    const persons = await personsRes.json();
+    const relations = await relationsRes.json();
 
-      const elements = [...persons, ...relations];
+    const elements = [...persons, ...relations];
 
-      if (cyRef.current) {
-        const cy = cytoscape({
-          container: cyRef.current,
-          elements,
+    if (cyRef.current) {
+      const cy = cytoscape({
+        container: cyRef.current,
+        elements,
           style: [
             {
               selector: 'node',
@@ -51,24 +51,44 @@ const PersonGraph = () => {
               },
             },
           ],
-          layout: {
-            name: 'grid',
-            rows: 1,
-          },
-        });
+        layout: {
+          name: 'circle',
+          rows: 1,
+        },
+      });
 
-        setCyInstance(cy);
+      setCyInstance(cy);
+    }
+  };
+
+  fetchDataAndRender();
+
+  return () => {
+    cyInstance?.destroy();
+  };
+}, []);
+
+useEffect(() => {
+  const interval = setInterval(async () => {
+    const res = await fetch('/api/persons');
+    const newPersons = await res.json();
+
+    newPersons.forEach((person: any) => {
+      if (!cyInstance?.getElementById(person.data.id).length) {
+        cyInstance?.add(person);
+        cyInstance?.layout({ name: 'circle' }).run();
       }
-    };
+    });
+  }, 5000);
 
-    fetchDataAndRender();
+  return () => clearInterval(interval);
+}, [cyInstance]);
 
-    return () => {
-      cyInstance?.destroy();
-    };
-  }, []);
-
-  return <div ref={cyRef} style={{ width: '100%', height: '500px' }} />;
+  return (
+    <div>
+      <div ref={cyRef} style={{ width: '100%', height: '500px' }} />
+    </div>
+  );
 };
 
 export default PersonGraph;
