@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -53,7 +55,6 @@ useEffect(() => {
           ],
         layout: {
           name: 'circle',
-          rows: 1,
         },
       });
 

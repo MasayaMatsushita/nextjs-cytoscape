@@ -1,32 +1,37 @@
 import { NextResponse } from 'next/server';
-
-// メモリ上の人物デー
+import { relations } from './data';
 import { persons } from '../persons/data';
 
-let relations: any[] = [
-  { data: { id: 'ab', source: 'a', target: 'b', label: '共同研究' } },
-];
-
-// GET: 関係性一覧取得
-export async function GET() {
-  return NextResponse.json(relations);
-}
-
-// POST: 関係性追加（source/targetが存在する場合のみ）
 export async function POST(req: Request) {
   const body = await req.json();
-  const { source, target } = body.data;
 
-  const sourceExists = persons.some(p => p.data.id === source);
-  const targetExists = persons.some(p => p.data.id === target);
-
-  if (!sourceExists || !targetExists) {
-    return NextResponse.json(
-      { error: '指定された人物IDが存在しません' },
-      { status: 400 }
-    );
+  if (!Array.isArray(body)) {
+    return NextResponse.json({ error: 'Expected an array of relations.' }, { status: 400 });
   }
 
-  relations.push(body);
-  return NextResponse.json({ message: '関係性追加完了', relation: body });
+  const isValid = body.every(rel => {
+    const data = rel.data;
+    const sourceExists = persons.some(p => p.data.id === data.source);
+    const targetExists = persons.some(p => p.data.id === data.target);
+    return data && data.id && data.source && data.target && sourceExists && targetExists;
+  });
+
+  if (!isValid) {
+    return NextResponse.json({ error: 'One or more relation entries are invalid or refer to unknown person IDs.' }, { status: 400 });
+  }
+
+  const hasDuplicate = body.some(rel =>
+    relations.some(r => r.data.id === rel.data.id)
+  );
+
+  if (hasDuplicate) {
+    return NextResponse.json({ error: 'One or more relation IDs already exist.' }, { status: 409 });
+  }
+
+  relations.push(...body);
+  return NextResponse.json({ message: 'All relations added successfully.', count: body.length });
+}
+
+export async function GET() {
+  return NextResponse.json(relations);
 }
