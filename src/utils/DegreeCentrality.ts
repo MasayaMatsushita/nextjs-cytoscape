@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import cytoscape from 'cytoscape';
+import type { SearchDegreeCentralityResultUndirected } from 'cytoscape';
 
 export async function calculateDegreeCentrality(baseUrl: string) {
   const [personsRes, relationsRes] = await Promise.all([
@@ -35,7 +36,7 @@ export async function calculateDegreeCentrality(baseUrl: string) {
     const result = cy.elements().degreeCentrality({
       root: node,
       directed: false
-    });
+    }) as SearchDegreeCentralityResultUndirected;
 
     return {
       id: node.id(),
