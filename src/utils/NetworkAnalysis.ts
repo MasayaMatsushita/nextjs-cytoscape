@@ -65,5 +65,6 @@ export async function calculateClusteringCoefficient(baseUrl: string): Promise<n
   }
 
   const average = localCoefficients.reduce((a, b) => a + b, 0) / localCoefficients.length;
+  if (isNaN(average)) return 0;
   return parseFloat(average.toFixed(4));
 }
