@@ -64,8 +64,6 @@ export async function calculateClusteringCoefficient(baseUrl: string): Promise<n
     localCoefficients.push(links / maxLinks);
   }
 
-  console.log(localCoefficients);
-
   const average = localCoefficients.reduce((a, b) => a + b, 0) / localCoefficients.length;
   return parseFloat(average.toFixed(4));
 }
