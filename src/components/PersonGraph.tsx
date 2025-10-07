@@ -135,6 +135,76 @@ useEffect(() => {
     <div style={{ position: 'relative' }}>
       <div ref={cyRef} style={{ width: '100%', height: '500px' }} />
 
+      <button
+        onClick={() => {
+          if (cyInstance) {
+            const json = cyInstance.json();
+            const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'person-network.json';
+            a.click();
+            URL.revokeObjectURL(url);
+          }
+        }}
+        style={{
+          marginTop: '12px',
+          padding: '8px 16px',
+          backgroundColor: '#0070f3',
+          color: '#fff',
+          borderRadius: '4px',
+          cursor: 'pointer',
+        }}
+      >
+        JSON出力
+      </button>
+
+      <button
+        onClick={async () => {
+          const [degreeRes, betweennessRes] = await Promise.all([
+            fetch('/api/degreeCentrality'),
+            fetch('/api/betweennessCentrality'),
+          ]);
+
+          const degreeData = await degreeRes.json();
+          const betweennessData = await betweennessRes.json();
+
+          const merged = degreeData.map((degree: any) => {
+            const match = betweennessData.find((b: any) => b.id === degree.id);
+            return {
+              id: degree.id,
+              name: degree.name,
+              degreeCentrality: degree.degreeCentrality,
+              betweennessCentrality: match?.betweennessCentrality ?? null,
+            };
+          });
+
+          const result = { Centrality: merged };
+
+          const blob = new Blob([JSON.stringify(result, null, 2)], {
+            type: 'application/json',
+          });
+
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'network-analysis.json';
+          a.click();
+          URL.revokeObjectURL(url);
+        }}
+        style={{
+          marginTop: '12px',
+          padding: '8px 16px',
+          backgroundColor: '#22c55e',
+          color: '#fff',
+          borderRadius: '4px',
+          cursor: 'pointer',
+        }}
+      >
+        中心性分析をJSON出力
+      </button>
+
       <Popover
         open={Boolean(selectedPerson && anchorPosition)}
         anchorReference="anchorPosition"
