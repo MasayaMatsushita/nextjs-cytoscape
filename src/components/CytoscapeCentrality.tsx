@@ -15,10 +15,21 @@ export default function CytoscapeCentrality() {
   const [centralityData, setCentralityData] = useState<CentralityItem[]>([]);
 
   useEffect(() => {
-    fetch('/api/degreeCentrality')
-      .then(res => res.json())
-      .then(setCentralityData)
-      .catch(err => console.error('中心性取得エラー:', err));
+    const fetchCentrality = () => {
+      fetch('/api/degreeCentrality')
+        .then(res => res.json())
+        .then(setCentralityData)
+        .catch(err => console.error('中心性取得エラー:', err));
+    };
+
+    // 初回実行
+    fetchCentrality();
+
+    // 5秒ごとに更新
+    const intervalId = setInterval(fetchCentrality, 5000);
+
+    // クリーンアップ
+    return () => clearInterval(intervalId);
   }, []);
 
   return (

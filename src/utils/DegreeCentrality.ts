@@ -40,7 +40,7 @@ export async function calculateDegreeCentrality(baseUrl: string) {
     return {
       id: node.id(),
       name: node.data('label'),
-      degreeCentrality: result.degree
+      degreeCentrality: result.degree / persons.length
     };
   });
 
