@@ -160,13 +160,15 @@ useEffect(() => {
 
       <button
         onClick={async () => {
-          const [degreeRes, betweennessRes] = await Promise.all([
+          const [degreeRes, betweennessRes, networkRes] = await Promise.all([
             fetch('/api/degreeCentrality'),
             fetch('/api/betweennessCentrality'),
+            fetch('/api/networkAnalysis'),
           ]);
 
           const degreeData = await degreeRes.json();
           const betweennessData = await betweennessRes.json();
+          const networkData = await networkRes.json();
 
           const merged = degreeData.map((degree: any) => {
             const match = betweennessData.find((b: any) => b.id === degree.id);
@@ -178,7 +180,13 @@ useEffect(() => {
             };
           });
 
-          const result = { Centrality: merged };
+          const result = {
+            Centrality: merged,
+            Network: {
+              graphDensity: networkData.graphDensity,
+              clusteringCoefficient: networkData.clusteringCoefficient,
+            },
+          };
 
           const blob = new Blob([JSON.stringify(result, null, 2)], {
             type: 'application/json',
