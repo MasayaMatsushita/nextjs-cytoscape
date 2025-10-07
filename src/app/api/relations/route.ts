@@ -13,6 +13,8 @@ export async function POST(req: Request) {
     const data = rel.data;
     const sourceExists = persons.some(p => p.data.id === data.source);
     const targetExists = persons.some(p => p.data.id === data.target);
+    console.log(persons);
+    console.log(data, data.id, data.source, data.target, sourceExists, targetExists);
     return data && data.id && data.source && data.target && sourceExists && targetExists;
   });
 

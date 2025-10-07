@@ -17,14 +17,14 @@ export async function calculateBetweennessCentrality(baseUrl: string) {
   const cy = cytoscape({
     elements: [
       ...persons.map((p: any) => ({
-        data: { id: p.id, label: p.label }
+        data: { id: p.id, name: p.name }
       })),
       ...relations.map((r: any) => ({
         data: {
           id: `${r.source}-${r.target}`,
           source: r.source,
           target: r.target,
-          label: r.label
+          label: r.department
         }
       }))
     ]
@@ -38,7 +38,7 @@ export async function calculateBetweennessCentrality(baseUrl: string) {
 
     return {
       id: node.id(),
-      name: node.data('label'),
+      name: node.data('name'),
       betweennessCentrality: typeof result.betweennessNormalized(node) === 'number'
         ? result.betweennessNormalized(node)
         : 0

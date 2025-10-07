@@ -34,7 +34,7 @@ const PersonGraph = () => {
               selector: 'node',
               style: {
                 'background-color': '#0070f3',
-                'label': 'data(label)',
+                'label': 'data(name)',
                 'color': '#fff',
                 'text-valign': 'center',
                 'text-halign': 'center',
@@ -52,7 +52,7 @@ const PersonGraph = () => {
                 'target-arrow-color': '#ccc',
                 'target-arrow-shape': 'triangle',
                 'curve-style': 'bezier',
-                'label': 'data(label)',
+                'label': 'data(department)',
                 'font-size': '10px',
                 'text-background-color': '#fff',
                 'text-background-opacity': 1,
@@ -154,7 +154,7 @@ useEffect(() => {
       >
         <div style={{ padding: '12px', maxWidth: '200px' }}>
           <Typography variant="subtitle1" fontWeight="bold">
-            {selectedPerson?.label}
+            {selectedPerson?.name}
           </Typography>
           <Typography variant="body2" style={{ whiteSpace: 'pre-wrap' }}>
             {JSON.stringify(selectedPerson, null, 2)}

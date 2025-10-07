@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   }
 
   // 全件の妥当性チェック（idとnameが必須）
-  const isValid = body.every(person => person.data.id && person.data.label);
+  const isValid = body.every(person => person.data.id && person.data.name);
   if (!isValid) {
     return NextResponse.json({ error: 'One or more person entries are invalid.' }, { status: 400 });
   }
