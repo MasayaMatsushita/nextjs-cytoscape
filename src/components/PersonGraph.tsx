@@ -133,8 +133,6 @@ useEffect(() => {
 
   return (
     <div style={{ position: 'relative' }}>
-      <div ref={cyRef} style={{ width: '100%', height: '500px' }} />
-
       <button
         onClick={() => {
           if (cyInstance) {
@@ -157,7 +155,7 @@ useEffect(() => {
           cursor: 'pointer',
         }}
       >
-        JSON出力
+        ネットワークJSON出力
       </button>
 
       <button
@@ -202,8 +200,10 @@ useEffect(() => {
           cursor: 'pointer',
         }}
       >
-        中心性分析をJSON出力
+        ネットワーク分析JSON出力
       </button>
+
+      <div ref={cyRef} style={{ width: '100%', height: '500px' }} />
 
       <Popover
         open={Boolean(selectedPerson && anchorPosition)}
