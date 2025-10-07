@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import {
+  Tabs, Tab, Box,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 } from '@mui/material';
 
@@ -14,8 +15,15 @@ type CentralityItem = {
   betweennessCentrality: number;
 };
 
+type NetworkAnalysisItem = {
+  graphDensity: number;
+  clusteringCoefficient: number;
+};
+
 export default function CytoscapeCentrality() {
+  const [tabIndex, setTabIndex] = useState(0);
   const [centralityData, setCentralityData] = useState<CentralityItem[]>([]);
+  const [networkData, setNetworkData] = useState<NetworkAnalysisItem | null>(null);
 
   useEffect(() => {
     const fetchCentrality = () => {
@@ -24,13 +32,10 @@ export default function CytoscapeCentrality() {
         fetch('/api/betweennessCentrality').then(res => res.json())
       ])
         .then(([degreeData, betweennessData]) => {
-          // ID をキーにしてマージ
           const mergedMap = new Map<string, any>();
-
           degreeData.forEach((item: any) => {
             mergedMap.set(item.id, { ...item });
           });
-
           betweennessData.forEach((item: any) => {
             const existing = mergedMap.get(item.id) || {};
             mergedMap.set(item.id, {
@@ -38,43 +43,77 @@ export default function CytoscapeCentrality() {
               betweennessCentrality: item.betweennessCentrality
             });
           });
-
-          const mergedArray = Array.from(mergedMap.values());
-          setCentralityData(mergedArray);
+          setCentralityData(Array.from(mergedMap.values()));
         })
         .catch(err => console.error('中心性取得エラー:', err));
     };
 
-    // 初回実行
+    const fetchNetworkAnalysis = () => {
+      fetch('/api/networkAnalysis')
+        .then(res => res.json())
+        .then(data => setNetworkData(data))
+        .catch(err => console.error('ネットワーク分析取得エラー:', err));
+    };
+
     fetchCentrality();
+    fetchNetworkAnalysis();
 
-    // 5秒ごとに更新
-    const intervalId = setInterval(fetchCentrality, 5000);
+    const intervalId = setInterval(() => {
+      fetchCentrality();
+      fetchNetworkAnalysis();
+    }, 5000);
 
-    // クリーンアップ
     return () => clearInterval(intervalId);
   }, []);
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>人物</TableCell>
-            <TableCell>次数中心性</TableCell>
-            <TableCell>媒介中心性</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {centralityData.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell>{item.name}</TableCell>
-              <TableCell>{item.degreeCentrality.toFixed(2)}</TableCell>
-              <TableCell>{item.betweennessCentrality.toFixed(2)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <Box>
+      <Tabs value={tabIndex} onChange={(_, newValue) => setTabIndex(newValue)}>
+        <Tab label="ネットワーク分析" />
+        <Tab label="中心性分析" />
+      </Tabs>
+
+      {tabIndex === 1 && (
+        <TableContainer component={Paper} sx={{ mt: 2 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>人物</TableCell>
+                <TableCell>次数中心性</TableCell>
+                <TableCell>媒介中心性</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {centralityData.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>{item.name}</TableCell>
+                  <TableCell>{item.degreeCentrality.toFixed(2)}</TableCell>
+                  <TableCell>{item.betweennessCentrality.toFixed(2)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      {tabIndex === 0 && networkData && (
+        <TableContainer component={Paper} sx={{ mt: 2 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>グラフ密度</TableCell>
+                <TableCell>クラスタ係数</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell>{networkData.graphDensity.toFixed(2)}</TableCell>
+                <TableCell>{networkData.clusteringCoefficient.toFixed(2)}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+    </Box>
   );
 }
