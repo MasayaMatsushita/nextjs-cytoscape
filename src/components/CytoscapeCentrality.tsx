@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -9,6 +11,7 @@ type CentralityItem = {
   id: string;
   name: string;
   degreeCentrality: number;
+  betweennessCentrality: number;
 };
 
 export default function CytoscapeCentrality() {
@@ -16,9 +19,29 @@ export default function CytoscapeCentrality() {
 
   useEffect(() => {
     const fetchCentrality = () => {
-      fetch('/api/degreeCentrality')
-        .then(res => res.json())
-        .then(setCentralityData)
+      Promise.all([
+        fetch('/api/degreeCentrality').then(res => res.json()),
+        fetch('/api/betweennessCentrality').then(res => res.json())
+      ])
+        .then(([degreeData, betweennessData]) => {
+          // ID をキーにしてマージ
+          const mergedMap = new Map<string, any>();
+
+          degreeData.forEach((item: any) => {
+            mergedMap.set(item.id, { ...item });
+          });
+
+          betweennessData.forEach((item: any) => {
+            const existing = mergedMap.get(item.id) || {};
+            mergedMap.set(item.id, {
+              ...existing,
+              betweennessCentrality: item.betweennessCentrality
+            });
+          });
+
+          const mergedArray = Array.from(mergedMap.values());
+          setCentralityData(mergedArray);
+        })
         .catch(err => console.error('中心性取得エラー:', err));
     };
 
@@ -39,6 +62,7 @@ export default function CytoscapeCentrality() {
           <TableRow>
             <TableCell>人物</TableCell>
             <TableCell>次数中心性</TableCell>
+            <TableCell>媒介中心性</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -46,6 +70,7 @@ export default function CytoscapeCentrality() {
             <TableRow key={item.id}>
               <TableCell>{item.name}</TableCell>
               <TableCell>{item.degreeCentrality}</TableCell>
+              <TableCell>{item.betweennessCentrality}</TableCell>
             </TableRow>
           ))}
         </TableBody>
