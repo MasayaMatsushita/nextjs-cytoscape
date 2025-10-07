@@ -69,8 +69,8 @@ export default function CytoscapeCentrality() {
           {centralityData.map((item) => (
             <TableRow key={item.id}>
               <TableCell>{item.name}</TableCell>
-              <TableCell>{item.degreeCentrality}</TableCell>
-              <TableCell>{item.betweennessCentrality}</TableCell>
+              <TableCell>{item.degreeCentrality.toFixed(2)}</TableCell>
+              <TableCell>{item.betweennessCentrality.toFixed(2)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
