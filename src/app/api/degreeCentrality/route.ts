@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { calculateDegreeCentrality } from '@/utils/DegreeCentrality';
 
 export async function GET() {
