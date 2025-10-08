@@ -109,7 +109,7 @@ useEffect(() => {
         cyInstance?.layout({ name: 'circle' }).run();
       }
     });
-  }, 5000);
+  }, Number(process.env.NEXT_PUBLIC_UPDATE_TIME ?? 5000));
 
   return () => clearInterval(interval);
 }, [cyInstance]);
@@ -126,7 +126,7 @@ useEffect(() => {
         cyInstance?.layout({ name: 'circle' }).run();
       }
     });
-  }, 5000);
+  }, Number(process.env.NEXT_PUBLIC_UPDATE_TIME ?? 5000));
 
   return () => clearInterval(interval);
 }, [cyInstance]);

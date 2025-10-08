@@ -61,7 +61,7 @@ export default function CytoscapeCentrality() {
     const intervalId = setInterval(() => {
       fetchCentrality();
       fetchNetworkAnalysis();
-    }, 5000);
+    }, Number(process.env.NEXT_PUBLIC_UPDATE_TIME ?? 5000));
 
     return () => clearInterval(intervalId);
   }, []);
