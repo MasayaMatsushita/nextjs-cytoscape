@@ -99,21 +99,21 @@ const PersonGraph = () => {
         >
           ネットワーク分析JSON出力
         </button>
+        <button
+          onClick={() => setGroupColoringEnabled((prev) => !prev)}
+          style={{
+            marginTop: '12px',
+            marginLeft: '8px',
+            padding: '8px 16px',
+            backgroundColor: groupColoringEnabled ? '#f59e0b' : '#6b7280',
+            color: '#fff',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          グループ色分け {groupColoringEnabled ? 'ON' : 'OFF'}
+        </button>
       </div>
-      <button
-        onClick={() => setGroupColoringEnabled((prev) => !prev)}
-        style={{
-          marginTop: '12px',
-          marginLeft: '8px',
-          padding: '8px 16px',
-          backgroundColor: groupColoringEnabled ? '#f59e0b' : '#6b7280',
-          color: '#fff',
-          borderRadius: '4px',
-          cursor: 'pointer',
-        }}
-      >
-        グループ色分け {groupColoringEnabled ? 'ON' : 'OFF'}
-      </button>
 
       <div ref={cyRef} style={{ width: '100%', height: '500px' }} />
 
