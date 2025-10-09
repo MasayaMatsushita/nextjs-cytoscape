@@ -11,6 +11,7 @@ export const usePersonGraph = () => {
   const [cyInstance, setCyInstance] = useState<Core | null>(null);
   const [selectedPerson, setSelectedPerson] = useState<any>(null);
   const [anchorPosition, setAnchorPosition] = useState<AnchorPosition>(null);
+  const [groupColoringEnabled, setGroupColoringEnabled] = useState(false);
 
   // 初期化と描画
   useEffect(() => {
@@ -40,12 +41,21 @@ export const usePersonGraph = () => {
         '#0ea5e9', '#14b8a6', '#e11d48', '#7c3aed', '#f43f5e'
       ];
 
-      const nodeStyles = uniqueGroups.map((group, index) => ({
-        selector: `node[group = ${group}]`,
-        style: {
-          'background-color': groupColors[index % groupColors.length],
-        },
-      }));
+      const nodeStyles = groupColoringEnabled
+        ? uniqueGroups.map((group, index) => ({
+            selector: `node[group = ${group}]`,
+            style: {
+              'background-color': groupColors[index % groupColors.length],
+            },
+          }))
+        : [
+            {
+              selector: 'node',
+              style: {
+                'background-color': '#888',
+              },
+            },
+          ];
 
       const elements = [...persons, ...relations];
 
@@ -153,12 +163,92 @@ export const usePersonGraph = () => {
     return () => clearInterval(interval);
   }, [cyInstance]);
 
+  useEffect(() => {
+  if (!cyInstance) return;
+
+  const updateStyles = async () => {
+    const res = await fetch('/api/persons');
+    const persons = await res.json();
+
+    const groupRes = await fetch('/api/louvainClustering');
+    const groupData = await groupRes.json();
+
+    const groupMap = new Map<string, number>();
+    groupData.forEach((item: any) => {
+      groupMap.set(item.id, item.group);
+    });
+
+    persons.forEach((person: any) => {
+      person.data.group = groupMap.get(person.data.id) ?? 0;
+    });
+
+    const uniqueGroups = [...new Set(persons.map((p: any) => p.data.group))];
+    const groupColors = [
+      '#0070f3', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6',
+      '#0ea5e9', '#14b8a6', '#e11d48', '#7c3aed', '#f43f5e'
+    ];
+
+    const nodeStyles = groupColoringEnabled
+      ? uniqueGroups.map((group, index) => ({
+          selector: `node[group = ${group}]`,
+          style: {
+            'background-color': groupColors[index % groupColors.length],
+          },
+        }))
+      : [
+          {
+            selector: 'node',
+            style: {
+              'background-color': '#888',
+            },
+          },
+        ];
+
+    cyInstance.style()
+      .fromJson([
+        {
+          selector: 'node',
+          style: {
+            'label': 'data(name)',
+            'color': '#fff',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'font-size': '12px',
+            'shape': 'roundrectangle',
+            'width': '75px',
+          },
+        },
+        ...nodeStyles,
+        {
+          selector: 'edge',
+          style: {
+            'width': 2,
+            'line-color': '#ccc',
+            'target-arrow-color': '#ccc',
+            'target-arrow-shape': 'triangle',
+            'curve-style': 'bezier',
+            'label': 'data(department)',
+            'font-size': '10px',
+            'text-background-color': '#fff',
+            'text-background-opacity': 1,
+            'text-background-padding': '2px',
+          },
+        },
+      ])
+      .update();
+    };
+
+    updateStyles();
+  }, [groupColoringEnabled, cyInstance]);
+
   return {
     cyRef,
     cyInstance,
     selectedPerson,
     anchorPosition,
+    groupColoringEnabled,
     setSelectedPerson,
     setAnchorPosition,
+    setGroupColoringEnabled,
   };
 };

@@ -11,8 +11,10 @@ const PersonGraph = () => {
     cyInstance,
     selectedPerson,
     anchorPosition,
+    groupColoringEnabled,
     setSelectedPerson,
     setAnchorPosition,
+    setGroupColoringEnabled
   } = usePersonGraph();
 
   const exportNetworkJson = () => {
@@ -70,33 +72,47 @@ const PersonGraph = () => {
 
   return (
     <div style={{ position: 'relative' }}>
-      <button
-        onClick={exportNetworkJson}
-        style={{
-          marginTop: '12px',
-          padding: '8px 16px',
-          backgroundColor: '#0070f3',
-          color: '#fff',
-          borderRadius: '4px',
-          cursor: 'pointer',
-        }}
-      >
-        ネットワークJSON出力
-      </button>
+      <div style={{ marginBottom: '12px' }}>
+        <button
+          onClick={exportNetworkJson}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#0070f3',
+            color: '#fff',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            marginRight: '8px',
+          }}
+        >
+          ネットワークJSON出力
+        </button>
 
+        <button
+          onClick={exportAnalysisJson}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#22c55e',
+            color: '#fff',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          ネットワーク分析JSON出力
+        </button>
+      </div>
       <button
-        onClick={exportAnalysisJson}
+        onClick={() => setGroupColoringEnabled((prev) => !prev)}
         style={{
           marginTop: '12px',
           marginLeft: '8px',
           padding: '8px 16px',
-          backgroundColor: '#22c55e',
+          backgroundColor: groupColoringEnabled ? '#f59e0b' : '#6b7280',
           color: '#fff',
           borderRadius: '4px',
           cursor: 'pointer',
         }}
       >
-        ネットワーク分析JSON出力
+        グループ色分け {groupColoringEnabled ? 'ON' : 'OFF'}
       </button>
 
       <div ref={cyRef} style={{ width: '100%', height: '500px' }} />
