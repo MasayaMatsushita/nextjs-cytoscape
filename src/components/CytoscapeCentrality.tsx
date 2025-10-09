@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -8,11 +7,12 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 } from '@mui/material';
 
-type CentralityItem = {
+type NodeItem = {
   id: string;
   name: string;
   degreeCentrality: number;
   betweennessCentrality: number;
+  group: number;
 };
 
 type NetworkAnalysisItem = {
@@ -22,16 +22,17 @@ type NetworkAnalysisItem = {
 
 export default function CytoscapeCentrality() {
   const [tabIndex, setTabIndex] = useState(0);
-  const [centralityData, setCentralityData] = useState<CentralityItem[]>([]);
+  const [nodeData, setNodeData] = useState<NodeItem[]>([]);
   const [networkData, setNetworkData] = useState<NetworkAnalysisItem | null>(null);
 
   useEffect(() => {
     const fetchCentrality = () => {
       Promise.all([
         fetch('/api/degreeCentrality').then(res => res.json()),
-        fetch('/api/betweennessCentrality').then(res => res.json())
+        fetch('/api/betweennessCentrality').then(res => res.json()),
+        fetch('/api/louvainClustering').then(res => res.json())
       ])
-        .then(([degreeData, betweennessData]) => {
+        .then(([degreeData, betweennessData, groupData]) => {
           const mergedMap = new Map<string, any>();
           degreeData.forEach((item: any) => {
             mergedMap.set(item.id, { ...item });
@@ -43,7 +44,14 @@ export default function CytoscapeCentrality() {
               betweennessCentrality: item.betweennessCentrality
             });
           });
-          setCentralityData(Array.from(mergedMap.values()));
+          groupData.forEach((item: any) => {
+            const existing = mergedMap.get(item.id) || {};
+            mergedMap.set(item.id, {
+              ...existing,
+              group: item.group
+            });
+          });
+          setNodeData(Array.from(mergedMap.values()));
         })
         .catch(err => console.error('中心性取得エラー:', err));
     };
@@ -81,14 +89,16 @@ export default function CytoscapeCentrality() {
                 <TableCell>人物</TableCell>
                 <TableCell>次数中心性</TableCell>
                 <TableCell>媒介中心性</TableCell>
+                <TableCell>グループ</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {centralityData.map((item) => (
+              {nodeData.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.degreeCentrality.toFixed(2)}</TableCell>
-                  <TableCell>{item.betweennessCentrality.toFixed(2)}</TableCell>
+                  <TableCell>{item.degreeCentrality}</TableCell>
+                  <TableCell>{item.betweennessCentrality}</TableCell>
+                  <TableCell>{item.group}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -15,13 +15,38 @@ const PersonGraph = () => {
 
   useEffect(() => {
     const fetchDataAndRender = async () => {
-      const [personsRes, relationsRes] = await Promise.all([
+      const [personsRes, relationsRes, groupRes] = await Promise.all([
         fetch('/api/persons'),
         fetch('/api/relations'),
+        fetch('/api/louvainClustering'),
       ]);
 
       const persons = await personsRes.json();
       const relations = await relationsRes.json();
+      const groupData = await groupRes.json();
+
+      const groupMap = new Map<string, number>();
+      groupData.forEach((item: any) => {
+        groupMap.set(item.id, item.group);
+      });
+
+      persons.forEach((person: any) => {
+        person.data.group = groupMap.get(person.data.id) ?? 0;
+      });
+
+      const uniqueGroups = [...new Set(persons.map((p: any) => p.data.group))];
+
+      const groupColors = [
+        '#0070f3', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6',
+        '#0ea5e9', '#14b8a6', '#e11d48', '#7c3aed', '#f43f5e'
+      ];
+
+      const nodeStyles = uniqueGroups.map((group, index) => ({
+        selector: `node[group = ${group}]`,
+        style: {
+          'background-color': groupColors[index % groupColors.length],
+        },
+      }));
 
       const elements = [...persons, ...relations];
 
@@ -33,7 +58,6 @@ const PersonGraph = () => {
             {
               selector: 'node',
               style: {
-                'background-color': '#0070f3',
                 'label': 'data(name)',
                 'color': '#fff',
                 'text-valign': 'center',
@@ -41,9 +65,9 @@ const PersonGraph = () => {
                 'font-size': '12px',
                 'shape': 'roundrectangle',
                 'width': '75px'
-
               },
             },
+            ...nodeStyles,
             {
               selector: 'edge',
               style: {
