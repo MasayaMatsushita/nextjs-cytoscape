@@ -27,11 +27,9 @@ export async function performClustering(baseUrl: string) {
   // Louvainクラスタリング実行
   const communities = louvain(graph);
 
-  return personsJson.map((person: any, i: any) => ({
-    data: {
-      id: person.data.id,
-      name: person.data.name,
-      group: communities[person.data.id]+1,
-    }
+  return personsJson.map((person: any) => ({
+    id: person.data.id,
+    name: person.data.name,
+    group: communities[person.data.id]+1,
   }));
 }
